@@ -1,0 +1,48 @@
+<div class="row">
+  <div class="col-md-4 offset-md-4">
+    <h2 class="text-center">Edit Employee</h2>
+    <div class="col-md-12" *ngIf="errorMessage">
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Trouble!</strong> {{errorMessage}}.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    </div>
+    <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label>First Name:</label>
+        <input type="text" formControlName="firstName" placeholder="FirstName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.firstName.errors }">
+        <div *ngIf="submitted && f.firstName.errors">
+          <div *ngIf="f.firstName.errors.required">First Name is required</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Last Name:</label>
+        <input type="text" formControlName="lastName" placeholder="LastName" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.lastName.errors }">
+        <div *ngIf="submitted && f.lastName.errors">
+          <div *ngIf="f.lastName.errors.required">LastName is required</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Hire Date: (YYYY-MM-DD)</label>
+        <input type="text" formControlName="hireDate" placeholder="HireDate" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.hireDate.errors }">
+        <div *ngIf="submitted && f.hireDate.errors">
+          <div *ngIf="f.hireDate.errors.required">Hire Date is required</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+          <label>Role:</label>
+          <input type="text" formControlName="role" placeholder="Role" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.role.errors }">
+          <div *ngIf="submitted && f.role.errors">
+            <div *ngIf="f.role.errors.required">Role is required</div>
+          </div>
+      </div>
+
+      <button type="submit"  class="btn btn-info">Update</button>
+    </form>
+  </div>
+</div>

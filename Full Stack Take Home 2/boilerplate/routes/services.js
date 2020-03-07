@@ -5,52 +5,78 @@ class Comment
 {
 	async get()
 	{	
-	 try {	 
-		const comments = await axios.all([this.getRon(), this.getJoke(), this.getQod()])
-								  .then(axios.spread(function (call1, call2, call3) {								
-									let result = new Array();
-									
-									if(call1) result.push(call1);
-									if(call2) result.push(call2);
-									if(call3) result.push(call3);
-									
-									return result ;
-								  }));
-		  
-		  return await comments;
-	  } catch(error) {
+		try {
+			var calls = [ new ExternalRon().get(), new ExternalJoke().get(), new ExternalQuotes().get()];
+			
+			return await axios.all(calls).then((responses) => { return responses; });	  
+		} catch(error) {
 			console.log(error);
-	  }
+		}
  	}
-	
-	getRon() {
-		return axios.get('https://ron-swanson-quotes.herokuapp.com/v2/quotes')
-					.then(function (response) { 
-						return response.data[0]; 
-					})
-					.catch(function (error) { 
-						console.log(error); 
-					});
+}
+
+class ExternalApiBase
+{
+	#url;
+	#headers;
+	transformResponse;
+
+	constructor(url, headers)
+	{
+		this.#url = url;
+		this.#headers = headers;
 	}
 
-	getJoke() {
-		return axios.get('https://icanhazdadjoke.com', { headers: { accept: 'application/json', timeout: 1000 } } )
-					.then(function (response) { 
-						return response.data.joke; 
-					})
-					.catch(function (error) { 
-						console.log(error); 
-					});
+	get() {
+		return axios.get(this.#url, { headers: this.#headers, transformResponse: this.transformResponse })
+			.then(function (response) { 
+				return response.data;
+			})
+			.catch(function (error) { 
+				console.error(error); 
+			});
+	}
+}
+
+class ExternalRon extends ExternalApiBase
+{
+	constructor()
+	{
+		super("https://ron-swanson-quotes.herokuapp.com/v2/quotes", { accept: 'application/json', timeout: 1000 });
+		super.transformResponse = [(data, headers) => this.getText(data) ];
 	}
 	
-	getQod() {
-		return axios.get('https://quotes.rest/qod', { headers: { accept: 'application/json', timeout: 1000 } })
-					.then(function (response) { 
-						return response.data.contents.quotes[0].quote; 
-					})
-					.catch(function (error) { 
-						console.log(error); 
-					});
+	getText(data) {
+		data = JSON.parse(data);
+	  return data[0];
+	}
+}
+
+class ExternalJoke extends ExternalApiBase
+{
+	constructor()
+	{
+		super("https://icanhazdadjoke.com", { accept: 'application/json', timeout: 1000 });
+		super.transformResponse = [(data, headers) => this.getText(data) ];
+	}
+	
+	getText(data) {
+		data = JSON.parse(data);
+	  return data.joke;
+	}
+}
+
+class ExternalQuotes extends ExternalApiBase
+{
+	constructor()
+	{
+		super("https://quotes.rest/qod", { accept: 'application/json', timeout: 1000 });
+		super.transformResponse = [(data, headers) => this.getText(data) ];
+	}
+	
+	getText(data) {
+		data = JSON.parse(data);
+	  return data.contents.quotes[0].quote;
 	}
 }
 

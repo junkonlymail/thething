@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 class Person {
   constructor(firstName, lastName, hireDate, role, id = uuidv4()) {
 	this.id = id;
-    this.firstName = firstName;
+	this.firstName = firstName;
 	this.lastName = lastName;
 	this.hireDate = hireDate;
 	this.role = role.toUpperCase();

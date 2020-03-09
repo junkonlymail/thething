@@ -6,7 +6,7 @@ class Comment
 	async get()
 	{	
 		try {
-			var calls = [ new ExternalRon().get(), new ExternalJoke().get(), new ExternalQuotes().get()];
+			var calls = [ new ExternalRonProvider().get(), new ExternalJokeProvider().get(), new ExternalQuoteProvider().get()];
 			
 			return await axios.all(calls).then((responses) => { return responses; });	  
 		} catch(error) {
@@ -19,7 +19,6 @@ class ExternalApiBase
 {
 	#url;
 	#headers;
-	transformResponse;
 
 	constructor(url, headers)
 	{
@@ -27,8 +26,13 @@ class ExternalApiBase
 		this.#headers = headers;
 	}
 
+	getData(data) {
+		data = JSON.parse(data);
+	  return this.getText(data);
+	}
+	
 	get() {
-		return axios.get(this.#url, { headers: this.#headers, transformResponse: this.transformResponse })
+		return axios.get(this.#url, { headers: this.#headers, transformResponse: [(data, headers) => this.getData(data) ] })
 			.then(function (response) { 
 				return response.data;
 			})
@@ -38,44 +42,38 @@ class ExternalApiBase
 	}
 }
 
-class ExternalRon extends ExternalApiBase
+class ExternalRonProvider extends ExternalApiBase
 {
 	constructor()
 	{
-		super("https://ron-swanson-quotes.herokuapp.com/v2/quotes", { accept: 'application/json', timeout: 1000 });
-		super.transformResponse = [(data, headers) => this.getText(data) ];
+		super("https://ron-swanson-quotes.herokuapp.com/v2/quotes", { timeout: 1000 });
 	}
 	
 	getText(data) {
-		data = JSON.parse(data);
 	  return data[0];
 	}
 }
 
-class ExternalJoke extends ExternalApiBase
+class ExternalJokeProvider extends ExternalApiBase
 {
 	constructor()
 	{
 		super("https://icanhazdadjoke.com", { accept: 'application/json', timeout: 1000 });
-		super.transformResponse = [(data, headers) => this.getText(data) ];
 	}
 	
 	getText(data) {
-		data = JSON.parse(data);
 	  return data.joke;
 	}
 }
 
-class ExternalQuotes extends ExternalApiBase
+class ExternalQuoteProvider extends ExternalApiBase
 {
 	constructor()
 	{
 		super("https://quotes.rest/qod", { accept: 'application/json', timeout: 1000 });
-		super.transformResponse = [(data, headers) => this.getText(data) ];
 	}
 	
 	getText(data) {
-		data = JSON.parse(data);
 	  return data.contents.quotes[0].quote;
 	}
 }
